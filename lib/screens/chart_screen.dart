@@ -5,6 +5,7 @@ import 'package:fcharts/fcharts.dart';
 import 'package:draw_graph/draw_graph.dart';
 import 'package:draw_graph/models/feature.dart';
 import 'package:custom_radio_grouped_button/custom_radio_grouped_button.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,22 +17,23 @@ class ChartScreen extends StatefulWidget {
 class _ChartScreenState extends State<ChartScreen> {
   var _dateRecord=[],_sumRecord=[],_dateWeek=[];
   var _dateMonth=[];
-  static var _mapDataWeek=[];
+  static List<double> _mapDataWeek=[];
   var _maplabel=List.generate(7, (index) => DateFormat(DateFormat.ABBR_WEEKDAY).format((DateTime.now().subtract(Duration(days: index)))));
   var _mwbit;
+  bool _isLoad = true;
 
   final routeName = 'chartscreen';
   @override
   initState() {
     super.initState();
     _getData();
-    _changeMap("Month");
+    _changeMap("Week");
     //getDates();
   }
   _getData() async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int _count = 0;
-    setState(() {
+
 //      if(prefs.containsKey('dateRecord')&&prefs.containsKey('sumRecord')){
 //        _dateRecord=(prefs.getStringList('dateRecord')??'') as List<String>;
 //        List<String> sumTemp =(prefs.getStringList('sumRecord')??'');
@@ -56,40 +58,46 @@ class _ChartScreenState extends State<ChartScreen> {
 //
 //        });
       }
-    });
     var _revdate=_dateRecord.reversed.toList();
     var _revSum=_sumRecord.reversed.toList();
-    print(_revdate.length);print(_revSum);print(_dateWeek);
+
+//    print(_revdate.length);print(_revSum);print(_dateWeek);
+    _mapDataWeek.clear();
+
     for(int index=0;index<7;index++){
       if(_dateWeek.elementAt(index)==_revdate.elementAt(index))
       {
         if(_revSum[index]==0)
-        {_mapDataWeek[index]=0;}
+        {_mapDataWeek.add(0);}
         else if(_revSum[index]>0 &&_revSum[index]<50)
-        {_mapDataWeek[index]=0.1;}
+        {_mapDataWeek.add(0.1);}
         else if(_revSum[index]==50)
-        {_mapDataWeek[index]=0.2;}
+        {_mapDataWeek.add(0.2);}
         else if(_revSum[index]>50 &&_revSum[index]<100)
-        {_mapDataWeek[index]=0.3;}
+        {_mapDataWeek.add(0.3);}
         else if(_revSum[index]==100)
-        {_mapDataWeek[index]=0.4;}
+        {_mapDataWeek.add(0.4);}
         else if(_revSum[index]>100 &&_revSum[index]<150)
-        {_mapDataWeek[index]=0.5;}
+        {_mapDataWeek.add(0.5);}
         else if(_revSum[index]==150)
-        {_mapDataWeek[index]=0.6;}
+        {_mapDataWeek.add(0.6);}
         else if(_revSum[index]>150 &&_revSum[index]<200)
-        {_mapDataWeek[index]=0.7;}
+        {_mapDataWeek.add(0.7);}
         else if(_revSum[index]==200)
-        { _mapDataWeek[index]=0.8;}
+        {_mapDataWeek.add(0.8);}
         else if(_revSum[index]>200 &&_revSum[index]<250)
-        {_mapDataWeek[index]=0.9;}
+        {_mapDataWeek.add(0.9);}
         else
-        {_mapDataWeek[index]=1;}
+        {_mapDataWeek.add(1);}
       }else{
-        _mapDataWeek[index]=0;
+        {_mapDataWeek.add(0);}
       }
-      //print(_mapDataWeek.map((dynamic item) => item as double)?.toList());
+
     }
+    print(_mapDataWeek.map((dynamic item) => item as double)?.toList());
+    setState(() {
+      _isLoad = false;
+    });
   }
   getDates() async{
 
@@ -98,7 +106,7 @@ class _ChartScreenState extends State<ChartScreen> {
     Feature(
       title: "Drink Water",
       color: Colors.blue,
-      data: [0.2, 0.8, 0.4, 0.7, 0.6],
+      data: _mapDataWeek,
     )
   ];
   _changeMap(String value) async{
@@ -174,72 +182,67 @@ class _ChartScreenState extends State<ChartScreen> {
                     ),
                   ],
                 ),
-                (_mwbit=='Week')?Container(
-                  height: constraints.maxHeight * 0.8,
-                  width: constraints.maxWidth*0.9,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: (_dateRecord.isNotEmpty)?LineGraph(
-                      features: features,
-                      size: Size(constraints.maxHeight*0.6, constraints.maxWidth*0.8) ,
-                      labelX: _maplabel,
-                      labelY: ['50', '100', '150', '200', '250'],
-                      showDescription: false,
-                      graphColor: Colors.black,
-                    ):
-                    Container(
-                      height: constraints.maxHeight*0.6,
-                      child: FittedBox(
-                          child: Image.asset('assets/images/gym.png',fit: BoxFit.cover,)),
-                    ),
+                (_mwbit=='Week')?_isLoad?Align(alignment: Alignment.center,child:SpinKitRotatingCircle(
+                  color: Colors.deepOrange,
+                  size: 50.0,
+                )):Expanded(
+                  child: (_dateRecord.isNotEmpty)?LineGraph(
+                    features: features,
+                    size: Size(constraints.maxHeight*0.6, constraints.maxWidth*0.8) ,
+                    labelX: _maplabel,
+                    labelY: ['50', '100', '150', '200', '250'],
+                    showDescription: false,
+                    graphColor: Colors.black,
+                  ):
+                  Container(
+                    height: constraints.maxHeight*0.6,
+                    child: FittedBox(
+                        child: Image.asset('assets/images/gym.png',fit: BoxFit.cover,)),
                   ),
-                ) : Container(
-                  child: Column(
-                    children: <Widget>[
-                      (_dateRecord.isNotEmpty)?Container(
-                        height: constraints.maxHeight*0.8,
-                        child: ListView.builder(
-                          itemBuilder: (ctx, index) {
-                            return Card(
-                              elevation: 5,
-                              margin: EdgeInsets.symmetric(
-                                vertical: 8,
-                                horizontal: 5,
-                              ),
-                              child: ListTile(
-                                leading: CircleAvatar(
-                                  radius: 40,
-                                  child: Padding(
-                                    padding: EdgeInsets.all(6),
-                                    child: FittedBox(
-                                      child: AutoSizeText(groupedValues[index]['amount'].toString(),
-                                        maxLines: 1,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                title: Text(
-                                  groupedValues[index]['day'],
-                                  style: Theme.of(context).textTheme.title,
-                                ),
-                                subtitle: AutoSizeText('Total Push ups'),
-                              ),
-                            );
-                          },
-                          itemCount: groupedValues.length,
+                ) : _isLoad?Align(alignment: Alignment.center,child:SpinKitRotatingCircle(
+                  color: Colors.deepOrange,
+                  size: 50.0,
+                )):(_dateRecord.isNotEmpty)?Expanded(
+                  child: ListView.builder(
+                    physics: BouncingScrollPhysics(),
+                    shrinkWrap: true,
+                    itemBuilder: (ctx, index) {
+                      return Card(
+                        elevation: 5,
+                        margin: EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 5,
                         ),
-                      )
-                      :Center(
-                        child: Container(
-                          height: constraints.maxHeight*0.8,
-                          child: FittedBox(
-                              child: Image.asset('assets/images/gym.png',fit: BoxFit.cover,)),
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            radius: 40,
+                            child: Padding(
+                              padding: EdgeInsets.all(6),
+                              child: FittedBox(
+                                child: AutoSizeText(groupedValues[index]['amount'].toString(),
+                                  maxLines: 1,
+                                ),
+                              ),
+                            ),
+                          ),
+                          title: Text(
+                            groupedValues[index]['day'],
+                            style: Theme.of(context).textTheme.title,
+                          ),
+                          subtitle: AutoSizeText('Total Push ups'),
                         ),
-                      ),
-                    ],
+                      );
+                    },
+                    itemCount: groupedValues.length,
+                  ),
+                )
+                :Center(
+                  child: Container(
+                    height: constraints.maxHeight*0.8,
+                    child: FittedBox(
+                        child: Image.asset('assets/images/gym.png',fit: BoxFit.cover,)),
                   ),
                 ),
-                Divider(),
               ],
             ),
           ),

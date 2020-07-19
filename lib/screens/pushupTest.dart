@@ -35,19 +35,20 @@ class _PushupTestState extends State<PushupTest> {
     initPlatformState();
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
   initPlatformState() async {
+
     _streamSubscriptions.add(proximityEvents.listen((ProximityEvent event) {
         setState(() {
           _proximity = event.x;
           flagg = event.x;
-          print(event.x);
           if (((_proximity).compareTo('Yes') == 0)) {
             count += 1;
           }
         });
     }));
   }
+
+
  void incrCount(){
     setState(() {
       count=count+1;
@@ -65,6 +66,7 @@ class _PushupTestState extends State<PushupTest> {
 
    });
   }
+
   _incrementCounter() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -89,6 +91,13 @@ class _PushupTestState extends State<PushupTest> {
   void setLevel(){
 
 
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _streamSubscriptions[0].cancel();
   }
 
   @override
