@@ -1,5 +1,7 @@
+import 'dart:math';
 import 'dart:ui';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:awesome_button/awesome_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +25,7 @@ class _MainScreenState extends State<MainScreen> {
   var setInfo={'Easy':{2,2,2,2,4},'Medium':{6,4,6,4,6},'Hard':{10,8,10,8,10}};
   Map<String,List<int>> myy={'Easy':[2,2,2,2,4],'Medium':[6,4,6,4,6],'Hard':[10,8,10,8,10]};
   String _currentLevel="";
+  var _sumRecord=[],_total=0,_best=0;
 
   final Color color = Color.fromRGBO(255, 161, 44, 1);
   @override
@@ -31,7 +34,7 @@ class _MainScreenState extends State<MainScreen> {
     _loadCounter();
   }
   void selectCategory(BuildContext ctx) {
-    Navigator.of(ctx).pushNamed(
+    Navigator.of(ctx).pushReplacementNamed(
       PushupTrainer.routeName,
     );
   }
@@ -39,7 +42,16 @@ class _MainScreenState extends State<MainScreen> {
   _loadCounter() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
+      if(prefs.containsKey('sumRecord')){
+        List<String> sumTemp =(prefs.getStringList('sumRecord')??'');
+        _sumRecord=sumTemp.map((i) => int.parse(i)).toList();
+        _sumRecord.asMap().forEach((index, value) {
+          _total=value+_total;
+        });
+      }
       _currentLevel = (prefs.getString('Level')??'');
+      _sumRecord.sort();
+      _best=_sumRecord.isEmpty?_best:_sumRecord.last;
     });
   }
    _changeLevel(String selected) async{
@@ -47,14 +59,14 @@ class _MainScreenState extends State<MainScreen> {
      setState(() {
        _currentLevel=selected;
        List<int> newsets;
-       if(_currentLevel.compareTo('Easy')==0){
-         newsets=myy['Easy'];
-       }else if(_currentLevel.compareTo('Medium')==0){
-         newsets=myy['Medium'];
-       }else{
-         newsets=myy['Hard'];
-       }
-       prefs.setStringList('Sets',newsets.map((i) => i.toString()).toList());
+//       if(_currentLevel.compareTo('Easy')==0){
+//         newsets=myy['Easy'];
+//       }else if(_currentLevel.compareTo('Medium')==0){
+//         newsets=myy['Medium'];
+//       }else{
+//         newsets=myy['Hard'];
+//       }
+//       prefs.setStringList('Sets',newsets.map((i) => i.toString()).toList());
      prefs.setString('Level', _currentLevel);
               });
       }
@@ -66,224 +78,240 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (ctx, constraints) {
-        return Column(
-          children: <Widget>[
-            Container(
-              height: constraints.maxHeight * 0.3,
-              child: Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15.0),
+        return WillPopScope(
+          onWillPop: () async => showDialog(
+            context: context,
+            builder: (context) =>
+                AlertDialog(title: Text('Are you sure you want to quit?'), actions: <Widget>[
+                  FlatButton(
+                      child: Text('Exit'),
+                      onPressed: () => Navigator.of(context).pop(true)),
+                  FlatButton(
+                      child: Text('Cancel'),
+                      onPressed: () => Navigator.of(context).pop(false)),
+                ])),
+          child: Column(
+            children: <Widget>[
+              Container(
+                height: constraints.maxHeight * 0.3,
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                  ),
+                  elevation: 10,
+                  child: FittedBox(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Container(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              // ignore: deprecated_member_use
+                              AutoSizeText(
+                                "Total",
+                                style: Theme.of(context).textTheme.title,
+                                maxLines: 1,
+                              ),
+                              Padding(
+                                padding: EdgeInsets.all(5),
+                                child: CircleAvatar(
+                                  radius: 40,
+                                  child: Text(
+                                    _total.toString(),
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontFamily: 'RobotoCondensed',
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                        Container(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              // ignore: deprecated_member_use
+                              AutoSizeText(
+                                "Best Overall",
+                                style: Theme.of(context).textTheme.title,
+                                maxLines: 1,
+                              ),
+                              Padding(
+                                padding: EdgeInsets.all(5),
+                                child: CircleAvatar(
+                                  radius: 40,
+                                  child: Text(
+                                   _best.toString(),
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontFamily: 'RobotoCondensed',
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              AutoSizeText(
+                                "Level",
+                                style: Theme.of(context).textTheme.title,
+                                maxLines: 1,
+                              ),
+                              Padding(
+                                padding: EdgeInsets.all(5),
+                                child: CircleAvatar(
+                                  radius: 40,
+                                  child: Text(
+                                   _currentLevel,
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        fontFamily: 'RobotoCondensed',
+                                        color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                elevation: 10,
+              ),
+              Divider(),
+              Container(
+                height: constraints.maxHeight * 0.15,
+                child: FittedBox(
+                    child: Hero(
+                      tag: 'protrainer',
+                      child: Image.asset(
+                  'assets/images/anim.gif',
+                  height: constraints.maxHeight * 0.2,
+                  width: constraints.maxWidth * 0.8,
+                  fit: BoxFit.cover,
+                ),
+                    )),
+              ),
+              Divider(),
+              Container(
+                height: constraints.maxHeight * 0.2,
+                padding: EdgeInsets.all(9),
+                child: FittedBox(
+                  child: AwesomeButton(
+                    blurRadius: 10.0,
+                    splashColor: Color.fromRGBO(255, 255, 255, .4),
+                    borderRadius: BorderRadius.circular(500.0),
+                    height: 100.0,
+                    width: 100.0,
+                    onTap: () {
+                      selectCategory(ctx);
+                    },
+                    color: Colors.deepOrange,
+                    child: Image.asset(
+                      'assets/images/gym.png',
+                      height: 70.0,
+                      width: 70.0,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              Divider(),
+              Container(
+                height: constraints.maxHeight * 0.2,
                 child: FittedBox(
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
-                      Container(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            // ignore: deprecated_member_use
-                            Text(
-                              "Total",
-                              style: Theme.of(context).textTheme.title,
+                      Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: AwesomeButton(
+                          blurRadius: 10.0,
+                          splashColor: Color.fromRGBO(255, 255, 255, .4),
+                          borderRadius: BorderRadius.circular(25.0),
+                          height: constraints.maxHeight * 0.1,
+                          width: constraints.maxWidth * 0.4,
+                          onTap: () => print("tapped"),
+                          color: Theme.of(context).primaryColor,
+                          child: AutoSizeText(
+                            "Practice",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'RobotoCondensed',
                             ),
-                            Padding(
-                              padding: EdgeInsets.all(5),
-                              child: CircleAvatar(
-                                radius: 40,
-                                child: Text(
-                                  total.toString(),
-                                  style: TextStyle(
-                                      fontSize: 15,
-                                      fontFamily: 'Raleway',
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            )
-                          ],
+                          ),
                         ),
                       ),
-                      Container(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            // ignore: deprecated_member_use
-                            Text(
-                              "Best Overall",
-                              style: Theme.of(context).textTheme.title,
+                      Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: AwesomeButton(
+                          blurRadius: 10.0,
+                          splashColor: Color.fromRGBO(255, 255, 255, .4),
+                          borderRadius: BorderRadius.circular(25.0),
+                          height: constraints.maxHeight * 0.1,
+                          width: constraints.maxWidth * 0.4,
+                          onTap: ()=> showMaterialModalBottomSheet(context:context ,builder: (context, scrollController) => Container(
+                            decoration: BoxDecoration(
+                              borderRadius:new BorderRadius.all(Radius.circular(20)),
+                              gradient: LinearGradient(
+                                        begin: Alignment.topRight,
+                                        end: Alignment.bottomLeft,
+                                        colors: [Colors.deepOrange, Theme.of(context).accentColor]),
                             ),
-                            Padding(
-                              padding: EdgeInsets.all(5),
-                              child: CircleAvatar(
-                                radius: 40,
-                                child: Text(
-                                  bestscore.toString(),
-                                  style: TextStyle(
-                                      fontSize: 15,
-                                      fontFamily: 'Raleway',
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
+                            height: constraints.maxHeight*0.3,
+                            child: RadioButtonGroup(
+                              activeColor: Colors.black,
+                              labelStyle: TextStyle(
+                                              color: Colors.black,
+                                               fontSize: 15.0,
+                                              fontWeight: FontWeight.bold,
+                                               fontFamily: 'RobotoCondensed',
+                                                      ),padding: EdgeInsets.all(10),
+                                labels: <String>[
+                                  "Easy",
+                                  "Medium",
+                                  "Hard"
+                                ],
+                                onSelected: (String selected) =>_changeLevel(selected)
                             ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              "Level",
-                              style: Theme.of(context).textTheme.title,
+                          ),
+                          elevation: 10,
+                            animationCurve: Curves.easeOutExpo,
+                            shape: RoundedRectangleBorder(),
+                            enableDrag: true,
+                            backgroundColor: Colors.white.withOpacity(0)
+                          ),
+                          color: Theme.of(context).primaryColor,
+                          child: AutoSizeText(
+                            "Change level",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'RobotoCondensed',
                             ),
-                            Padding(
-                              padding: EdgeInsets.all(5),
-                              child: CircleAvatar(
-                                radius: 40,
-                                child: Text(
-                                 _currentLevel,
-                                  style: TextStyle(
-                                      fontSize: 15,
-                                      fontFamily: 'Raleway',
-                                      color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ),
-            Divider(),
-            Container(
-              height: constraints.maxHeight * 0.15,
-              child: FittedBox(
-                  child: Hero(
-                    tag: 'protrainer',
-                    child: Image.asset(
-                'assets/images/anim.gif',
-                height: constraints.maxHeight * 0.2,
-                width: constraints.maxWidth * 0.8,
-                fit: BoxFit.cover,
-              ),
-                  )),
-            ),
-            Divider(),
-            Container(
-              height: constraints.maxHeight * 0.2,
-              padding: EdgeInsets.all(9),
-              child: FittedBox(
-                child: AwesomeButton(
-                  blurRadius: 10.0,
-                  splashColor: Color.fromRGBO(255, 255, 255, .4),
-                  borderRadius: BorderRadius.circular(500.0),
-                  height: 100.0,
-                  width: 100.0,
-                  onTap: () {
-                    selectCategory(ctx);
-                  },
-                  color: Colors.deepOrange,
-                  child: Image.asset(
-                    'assets/images/gym.png',
-                    height: 70.0,
-                    width: 70.0,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-            Divider(),
-            Container(
-              height: constraints.maxHeight * 0.2,
-              child: FittedBox(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: AwesomeButton(
-                        blurRadius: 10.0,
-                        splashColor: Color.fromRGBO(255, 255, 255, .4),
-                        borderRadius: BorderRadius.circular(25.0),
-                        height: constraints.maxHeight * 0.1,
-                        width: constraints.maxWidth * 0.4,
-                        onTap: () => print("tapped"),
-                        color: Theme.of(context).primaryColor,
-                        child: Text(
-                          "Practice",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'RobotoCondensed',
-                          ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: AwesomeButton(
-                        blurRadius: 10.0,
-                        splashColor: Color.fromRGBO(255, 255, 255, .4),
-                        borderRadius: BorderRadius.circular(25.0),
-                        height: constraints.maxHeight * 0.1,
-                        width: constraints.maxWidth * 0.4,
-                        onTap: ()=> showMaterialModalBottomSheet(context:context ,builder: (context, scrollController) => Container(
-                          decoration: BoxDecoration(
-                            borderRadius:new BorderRadius.all(Radius.circular(20)),
-                            gradient: LinearGradient(
-                                      begin: Alignment.topRight,
-                                      end: Alignment.bottomLeft,
-                                      colors: [Colors.deepOrange, Theme.of(context).accentColor]),
-                          ),
-                          height: constraints.maxHeight*0.3,
-                          child: RadioButtonGroup(
-                            activeColor: Colors.black,
-                            labelStyle: TextStyle(
-                                            color: Colors.black,
-                                             fontSize: 15.0,
-                                            fontWeight: FontWeight.bold,
-                                             fontFamily: 'RobotoCondensed',
-                                                    ),padding: EdgeInsets.all(10),
-                              labels: <String>[
-                                "Easy",
-                                "Medium",
-                                "Hard"
-                              ],
-                              onSelected: (String selected) =>_changeLevel(selected)
-                          ),
-                        ),
-                        elevation: 10,
-                          animationCurve: Curves.easeOutExpo,
-                          shape: RoundedRectangleBorder(),
-                          enableDrag: true,
-                          backgroundColor: Colors.white.withOpacity(0)
-                        ),
-                        color: Theme.of(context).primaryColor,
-                        child: Text(
-                          "Change level",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'RobotoCondensed',
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          ],
+              )
+            ],
+          ),
         );
       },
     );

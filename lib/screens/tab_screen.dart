@@ -37,6 +37,7 @@ class _TabsScreenState extends State<TabsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_pages[_selectedPageIndex]['title'],style: TextStyle(fontWeight: FontWeight.bold),),
+        automaticallyImplyLeading: false,
       ),
       body: _pages[_selectedPageIndex]['page'],
       bottomNavigationBar: BottomNavigationBar(

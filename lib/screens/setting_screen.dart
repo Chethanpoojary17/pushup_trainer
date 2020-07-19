@@ -10,8 +10,21 @@ class _SettingScreenState extends State<SettingScreen> {
   final routeName='settingscreen';
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return WillPopScope(
+      onWillPop: () async => showDialog(
+          context: context,
+          builder: (context) =>
+              AlertDialog(title: Text('Are you sure you want to quit?'), actions: <Widget>[
+                FlatButton(
+                    child: Text('Exit'),
+                    onPressed: () => Navigator.of(context).pop(true)),
+                FlatButton(
+                    child: Text('Cancel'),
+                    onPressed: () => Navigator.of(context).pop(false)),
+              ])),
+      child: Container(
 
+      ),
     );
   }
 }

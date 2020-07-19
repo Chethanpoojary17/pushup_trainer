@@ -55,7 +55,7 @@ class _PushupTestState extends State<PushupTest> {
  }
   void goBack(BuildContext ctx) {
     _incrementCounter();
-    Navigator.of(ctx).pushNamed(
+    Navigator.of(ctx).pushReplacementNamed(
       TabsScreen.routeName,
     );
   }
