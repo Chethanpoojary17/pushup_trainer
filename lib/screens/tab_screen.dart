@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pushuptrainer/screens/chart_screen.dart';
-import 'package:pushuptrainer/screens/main_screen.dart';
-import 'package:pushuptrainer/screens/setting_screen.dart';
+import 'package:pushuptrainerpro/screens/chart_screen.dart';
+import 'package:pushuptrainerpro/screens/main_screen.dart';
+import 'package:pushuptrainerpro/screens/setting_screen.dart';
 class TabsScreen extends StatefulWidget {
   static const routeName='\tabscreen';
   @override

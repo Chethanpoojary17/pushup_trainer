@@ -18,7 +18,8 @@ class _ChartScreenState extends State<ChartScreen> {
   var _dateRecord=[],_sumRecord=[],_dateWeek=[];
   var _dateMonth=[];
   static List<double> _mapDataWeek=[];
-  var _maplabel=List.generate(7, (index) => DateFormat(DateFormat.ABBR_WEEKDAY).format((DateTime.now().subtract(Duration(days: index)))));
+  List<String> _maplabel=[];
+  List<String> _maplabel2=[];
   var _mwbit;
   bool _isLoad = true;
 
@@ -32,81 +33,69 @@ class _ChartScreenState extends State<ChartScreen> {
   }
   _getData() async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    int _count = 0;
-
-//      if(prefs.containsKey('dateRecord')&&prefs.containsKey('sumRecord')){
-//        _dateRecord=(prefs.getStringList('dateRecord')??'') as List<String>;
-//        List<String> sumTemp =(prefs.getStringList('sumRecord')??'');
-//        sumTemp.map((i){_sumRecord[_count] =int.parse(i);_count++;}).toList();
-//      }
-      if(!prefs.containsKey('dateRecord')&& ! prefs.containsKey('sumRecord')){
-//        _dateRecord=(prefs.getStringList('dateRecord')??'') as List<String>;
-//        List<String> sumTemp =(prefs.getStringList('sumRecord')??'');
-//        _sumRecord=sumTemp.map((i) => int.parse(i)).toList();
-        _dateRecord=['2020-07-13', '2020-07-14', '2020-07-15', '2020-07-16', '2020-07-17', '2020-07-18', '2020-07-19'];
-        _sumRecord=[20,30,60,20,200,150,300];
-        print(_sumRecord);
-        print(_dateRecord);
-
-        _dateMonth=List.generate(30, (index) => DateFormat('yyyy-MM-dd').format((DateTime.now().subtract(Duration(days: index))))).reversed.toList();
-        _dateWeek=List.generate(7, (index) => DateFormat('yyy-MM-dd').format((DateTime.now().subtract(Duration(days: index)))));
-        print(_dateMonth);
-        print(_maplabel);
-//         print(_mapDataWeek);
-         print('out');
-//        _dateWeek.asMap().forEach((index, value) {
-//
-//        });
+      if(prefs.containsKey('dateRecord')&&  prefs.containsKey('sumRecord')) {
+        _dateRecord = (prefs.getStringList('dateRecord') ?? '');
+        List<String> sumTemp = (prefs.getStringList('sumRecord') ?? '');
+        _sumRecord = sumTemp.map((i) => int.parse(i)).toList();
+        var _revdate = _dateRecord.reversed.toList();
+        var _revSum = _sumRecord.reversed.toList();
+        if (_dateRecord.length >= 7) {
+          _maplabel2 = List.generate(7, (index) =>
+              DateFormat('MM-dd').format(
+                  (DateTime.parse(_revdate.elementAt(index)))));
+        } else {
+          _maplabel2 = List.generate(_revdate.length, (index) =>
+              DateFormat('MM-dd').format(
+                  (DateTime.parse(_revdate.elementAt(index)))));
+        }
+        _mapDataWeek.clear();
+        int index2;
+        (_revdate.length >= 7) ? index2 = 7 : index2 = _revdate.length;
+        for (int index = 0; index < index2; index++) {
+          if (_revSum[index] == 0) {
+            _mapDataWeek.add(0);
+          }
+          else if (_revSum[index] > 0 && _revSum[index] < 50) {
+            _mapDataWeek.add(0.1);
+          }
+          else if (_revSum[index] == 50) {
+            _mapDataWeek.add(0.2);
+          }
+          else if (_revSum[index] > 50 && _revSum[index] < 100) {
+            _mapDataWeek.add(0.3);
+          }
+          else if (_revSum[index] == 100) {
+            _mapDataWeek.add(0.4);
+          }
+          else if (_revSum[index] > 100 && _revSum[index] < 150) {
+            _mapDataWeek.add(0.5);
+          }
+          else if (_revSum[index] == 150) {
+            _mapDataWeek.add(0.6);
+          }
+          else if (_revSum[index] > 150 && _revSum[index] < 200) {
+            _mapDataWeek.add(0.7);
+          }
+          else if (_revSum[index] == 200) {
+            _mapDataWeek.add(0.8);
+          }
+          else if (_revSum[index] > 200 && _revSum[index] < 250) {
+            _mapDataWeek.add(0.9);
+          }
+          else {
+            _mapDataWeek.add(1);
+          }
+        }
       }
-    var _revdate=_dateRecord.reversed.toList();
-    var _revSum=_sumRecord.reversed.toList();
-
-//    print(_revdate.length);print(_revSum);print(_dateWeek);
-    _mapDataWeek.clear();
-
-    for(int index=0;index<7;index++){
-      if(_dateWeek.elementAt(index)==_revdate.elementAt(index))
-      {
-        if(_revSum[index]==0)
-        {_mapDataWeek.add(0);}
-        else if(_revSum[index]>0 &&_revSum[index]<50)
-        {_mapDataWeek.add(0.1);}
-        else if(_revSum[index]==50)
-        {_mapDataWeek.add(0.2);}
-        else if(_revSum[index]>50 &&_revSum[index]<100)
-        {_mapDataWeek.add(0.3);}
-        else if(_revSum[index]==100)
-        {_mapDataWeek.add(0.4);}
-        else if(_revSum[index]>100 &&_revSum[index]<150)
-        {_mapDataWeek.add(0.5);}
-        else if(_revSum[index]==150)
-        {_mapDataWeek.add(0.6);}
-        else if(_revSum[index]>150 &&_revSum[index]<200)
-        {_mapDataWeek.add(0.7);}
-        else if(_revSum[index]==200)
-        {_mapDataWeek.add(0.8);}
-        else if(_revSum[index]>200 &&_revSum[index]<250)
-        {_mapDataWeek.add(0.9);}
-        else
-        {_mapDataWeek.add(1);}
-      }else{
-        {_mapDataWeek.add(0);}
-      }
-
-    }
-    print(_mapDataWeek.map((dynamic item) => item as double)?.toList());
     setState(() {
       _isLoad = false;
     });
-  }
-  getDates() async{
-
   }
   List<Feature> features = [
     Feature(
       title: "Drink Water",
       color: Colors.blue,
-      data: _mapDataWeek,
+      data: _mapDataWeek.map((dynamic item) => item as double)?.toList(),
     )
   ];
   _changeMap(String value) async{
@@ -186,24 +175,40 @@ class _ChartScreenState extends State<ChartScreen> {
                   color: Colors.deepOrange,
                   size: 50.0,
                 )):Expanded(
-                  child: (_dateRecord.isNotEmpty)?LineGraph(
+                  child: (_dateRecord.length>=2)?LineGraph(
                     features: features,
                     size: Size(constraints.maxHeight*0.6, constraints.maxWidth*0.8) ,
-                    labelX: _maplabel,
+                    labelX: _maplabel2.map((dynamic item) => item as String)?.toList(),
                     labelY: ['50', '100', '150', '200', '250'],
                     showDescription: false,
                     graphColor: Colors.black,
                   ):
-                  Container(
-                    height: constraints.maxHeight*0.6,
-                    child: FittedBox(
-                        child: Image.asset('assets/images/gym.png',fit: BoxFit.cover,)),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: <Widget>[
+
+                      Container(
+                        padding: EdgeInsets.all(constraints.maxHeight*0.01),
+                        height: constraints.maxHeight*0.5,
+                        child: Image.asset('assets/images/anim_nothing.gif',fit: BoxFit.cover,),
+                      ),
+                      Card(
+                        elevation: 5,
+                        child: AutoSizeText('Note: Graph will be displayed once you have 2 or more records.',style: TextStyle(color: Colors.deepOrange,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 20,
+                            fontFamily: 'RobotoCondensed'),
+                          maxLines: 2,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
                   ),
                 ) : _isLoad?Align(alignment: Alignment.center,child:SpinKitRotatingCircle(
                   color: Colors.deepOrange,
                   size: 50.0,
-                )):(_dateRecord.isNotEmpty)?Expanded(
-                  child: ListView.builder(
+                )):Expanded(
+                  child:(_dateRecord.isNotEmpty)? ListView.builder(
                     physics: BouncingScrollPhysics(),
                     shrinkWrap: true,
                     itemBuilder: (ctx, index) {
@@ -234,13 +239,28 @@ class _ChartScreenState extends State<ChartScreen> {
                       );
                     },
                     itemCount: groupedValues.length,
-                  ),
-                )
-                :Center(
-                  child: Container(
-                    height: constraints.maxHeight*0.8,
-                    child: FittedBox(
-                        child: Image.asset('assets/images/gym.png',fit: BoxFit.cover,)),
+                  ):
+
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: <Widget>[
+
+                      Container(
+                        padding: EdgeInsets.all(constraints.maxHeight*0.01),
+                        height: constraints.maxHeight*0.5,
+                        child: Image.asset('assets/images/anim_nothing.gif',fit: BoxFit.cover,),
+                      ),
+                      Card(
+                        elevation: 5,
+                        child: AutoSizeText('Note: Records database is currently empty, Train now and update the database.',style: TextStyle(color: Colors.deepOrange,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 20,
+                            fontFamily: 'RobotoCondensed'),
+                          maxLines: 2,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

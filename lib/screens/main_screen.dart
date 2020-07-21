@@ -6,7 +6,8 @@ import 'package:awesome_button/awesome_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:grouped_buttons/grouped_buttons.dart';
-import 'package:pushuptrainer/screens/pushup_trainer.dart';
+import 'package:pushuptrainerpro/screens/practice_screen.dart';
+import 'package:pushuptrainerpro/screens/pushup_trainer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
@@ -298,7 +299,8 @@ class _MainScreenState extends State<MainScreen> {
                         borderRadius: BorderRadius.circular(25.0),
                         height: constraints.maxHeight * 0.1,
                         width: constraints.maxWidth * 0.4,
-                        onTap: () => print("tapped"),
+                        onTap: () => Navigator.of(context).pushReplacement(MaterialPageRoute(
+                            builder: (BuildContext context) => PracticeScreen())),
                         color: Theme.of(context).primaryColor,
                         child: AutoSizeText(
                           "Practice",

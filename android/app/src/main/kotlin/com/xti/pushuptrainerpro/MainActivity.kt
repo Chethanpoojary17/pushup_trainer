@@ -1,4 +1,4 @@
-package com.example.pushuptrainer
+package com.xti.pushuptrainerpro
 
 import io.flutter.embedding.android.FlutterActivity
 

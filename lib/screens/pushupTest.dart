@@ -5,7 +5,7 @@ import 'package:awesome_button/awesome_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:proximity_plugin/proximity_plugin.dart';
-import 'package:pushuptrainer/screens/tab_screen.dart';
+import 'package:pushuptrainerpro/screens/tab_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 

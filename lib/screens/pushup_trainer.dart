@@ -6,11 +6,11 @@ import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:proximity_plugin/proximity_plugin.dart';
-import 'package:pushuptrainer/models/recordData.dart';
+import 'package:pushuptrainerpro/models/recordData.dart';
 import 'dart:async';
 
-import 'package:pushuptrainer/screens/main_screen.dart';
-import 'package:pushuptrainer/screens/tab_screen.dart';
+import 'package:pushuptrainerpro/screens/main_screen.dart';
+import 'package:pushuptrainerpro/screens/tab_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PushupTrainer extends StatefulWidget {
@@ -51,6 +51,12 @@ class _MyAppState extends State<PushupTrainer> {
     initPlatformState();
     getCurrentSets();
   }
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _streamSubscriptions[0].cancel();
+  }
   nextSets() async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -84,7 +90,6 @@ class _MyAppState extends State<PushupTrainer> {
     setState(() {
       List<String> setstemp =(prefs.getStringList('Sets')??'');
       _sets=setstemp.map((i) => int.parse(i)).toList();
-      print(_sets);
       Level=(prefs.getString('Level')??'');
       setindex=0;
       currentSet=_sets[setindex];
@@ -98,26 +103,19 @@ class _MyAppState extends State<PushupTrainer> {
     var sum=0;
     setState(() {
       if(saveBit==0) {
-       print(Level);
        if(prefs.containsKey('dateRecord')&&prefs.containsKey('sumRecord')){
          _dateRecord=(prefs.getStringList('dateRecord')??'') as List<String>;
          List<String> sumTemp =(prefs.getStringList('sumRecord')??'');
          _sumRecord=sumTemp.map((i) => int.parse(i)).toList();
-         print(_sumRecord);
-         print(_dateRecord);
        }
        if(_dateRecord.last==(DateFormat('yyyy-MM-dd').format(DateTime.now()))){
          var sss=0;
          _sets.asMap().forEach((key, value) { sss=sss+value; });
-         print(sss);
-         print(_sumRecord.length);
-         _sumRecord[_dateRecord.length-1]=_sumRecord[_dateRecord.length-1]+summ;print('yyy');
-         print(_sumRecord);
+         _sumRecord[_dateRecord.length-1]=_sumRecord[_dateRecord.length-1]+sss;
        }else{
          _dateRecord.add((DateFormat('yyyy-MM-dd').format(DateTime.now())));
-         _sumRecord.add(summ);print('ttt');
+         _sumRecord.add(summ);
        }
-       print(Level);
        prefs.setStringList('dateRecord', _dateRecord);
        prefs.setStringList('sumRecord', _sumRecord.map((i) => i.toString()).toList());
        print(Level);
@@ -146,25 +144,6 @@ class _MyAppState extends State<PushupTrainer> {
 //     getCurrentSets();
    });
   }
-//  void incrCount(){
-//    setState(() {
-//      if(count<currentSet) {
-//        count = count + 1;
-//        if (count == 1) {
-//          t4 = 'Yes';
-//        } else if (count == (currentSet * 0.5)) {
-//          t4 = 'More';
-//        } else if (count == (currentSet - 1)) {
-//          t4 = 'One last';
-//        } else if (count == currentSet) {
-//          t4 = 'Stop';
-//          summ = summ + currentSet;
-//          currentRound = 2;
-//        }
-//      }
-//    });
-//  }
-  // Platform messages are asynchronous, so we initialize in an async method.
   initPlatformState() async {
     _streamSubscriptions.add(proximityEvents.listen((ProximityEvent event) {
       setState(() {
@@ -188,7 +167,6 @@ class _MyAppState extends State<PushupTrainer> {
                 }
         if(setindex==4 && count==currentSet){
           chckbit=1;
-          print('yyyysysys');
           _saveState();
         }
       });
@@ -199,6 +177,7 @@ class _MyAppState extends State<PushupTrainer> {
     }));
   }
   void goBack(BuildContext ctx) {
+    Navigator.of(context).pop(true);
     Navigator.of(ctx).pushReplacementNamed(
       TabsScreen.routeName,
     );
@@ -347,9 +326,8 @@ class _MyAppState extends State<PushupTrainer> {
                       borderRadius: BorderRadius.circular(25.0),
                       height: height3* 0.1,
                       width: width * 0.4,
-                      onTap:() {
-                        goBack(context);
-                      },
+                      onTap:() => Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          builder: (BuildContext context) => TabsScreen())),
                       color: Theme.of(context).primaryColor,
                       child: Text(
                         "Take Break",
@@ -375,7 +353,7 @@ class _MyAppState extends State<PushupTrainer> {
                     backgroundColor: Theme.of(context).primaryColor,
                     title:  "Hey Hustler",
                     message:  "Please complete the current set",
-                    duration:  Duration(seconds: 3),
+                    duration:  Duration(seconds: 2),
                   )..show(context),
                   color: Theme.of(context).primaryColor,
                   child: Text(

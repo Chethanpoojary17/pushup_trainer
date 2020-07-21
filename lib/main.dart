@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:pushuptrainer/screens/chart_screen.dart';
-import 'package:pushuptrainer/screens/main_screen.dart';
-import 'package:pushuptrainer/screens/pushupTest.dart';
-import 'package:pushuptrainer/screens/pushup_trainer.dart';
-import 'package:pushuptrainer/screens/setting_screen.dart';
+import 'package:pushuptrainerpro/screens/chart_screen.dart';
+import 'package:pushuptrainerpro/screens/main_screen.dart';
+import 'package:pushuptrainerpro/screens/pushupTest.dart';
+import 'package:pushuptrainerpro/screens/pushup_trainer.dart';
+import 'package:pushuptrainerpro/screens/setting_screen.dart';
+import 'package:pushuptrainerpro/screens/splash_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import './screens/tab_screen.dart';
-void main() => runApp(MyApp());
+import 'package:flutter/services.dart';
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((_) {
+    runApp(new MyApp());
+  });
+}
 
 class MyApp extends StatefulWidget {
   @override
@@ -22,7 +30,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Protrainer',
+      title: 'Pushup Trainer pro',
       theme: ThemeData(
         primarySwatch: Colors.deepOrange,
         accentColor: Color.fromRGBO(255, 194, 179,1),
@@ -46,7 +54,7 @@ class _MyAppState extends State<MyApp> {
             )),
 
       ),
-      home: PushupTest(),
+      home: SplashScreen(),
       initialRoute: '/', // default is '/'
       routes: {
         TabsScreen.routeName: (ctx) => TabsScreen(),
@@ -58,22 +66,3 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Push-ups Trainer'),
-      ),
-      body: Center(
-        child: Text('Navigation Time!'),
-      ),
-    );
-  }
-}
